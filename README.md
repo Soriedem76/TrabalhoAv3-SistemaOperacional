@@ -2,7 +2,7 @@
 
 **Repositório no GitHub:** https://github.com/Soriedem76/TrabalhoAv3-SistemaOperacional
 
-**Disciplina:** Sistemas Operacionais · **Trabalho AV3** · **Dupla:** Gustavo (Pessoa A) e Juan Doth Camerino Costa Coelho (Pessoa B)
+**Disciplina:** Sistemas Operacionais · **Trabalho AV3** · **Dupla:** Gustavo e Juan Doth Camerino Costa Coelho
 
 ---
 
