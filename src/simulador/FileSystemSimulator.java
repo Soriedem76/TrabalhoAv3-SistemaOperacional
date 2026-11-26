@@ -16,7 +16,7 @@ import java.util.List;
  * (ex.: /docs/notas.txt). Aceita "." e ".." na normalização.
  *
  * Cada operação que altera o sistema valida tudo primeiro e só então chama o Journal
- * (registrar -> executar -> confirmar), o que permite à Pessoa B plugar o journaling.
+ * (registrar -> executar -> confirmar), integrando o journaling (classe Journal).
  */
 public class FileSystemSimulator implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -24,11 +24,28 @@ public class FileSystemSimulator implements Serializable {
     private final Directory raiz = new Directory("");
     private transient Journal journal;
 
+    /**
+     * ID da última operação do journal já aplicada a este sistema. É salvo junto com a imagem,
+     * então a recuperação sabe quais entradas do log já estão no checkpoint (evita reaplicar 2x).
+     */
+    private long ultimoIdAplicado = 0;
+
     public FileSystemSimulator() { }
 
     public void setJournal(Journal journal) { this.journal = journal; }
 
+    public Journal getJournal() { return journal; }
+
+    public long getUltimoIdAplicado() { return ultimoIdAplicado; }
+
+    void setUltimoIdAplicado(long id) { this.ultimoIdAplicado = id; }
+
     public Directory getRaiz() { return raiz; }
+
+    /** Devolve o nó (arquivo ou diretório) de um caminho absoluto. */
+    public Node obter(String caminho) {
+        return resolver(partes(caminho));
+    }
 
     // ------------------------------------------------------------------
     // Operações de diretório
@@ -190,12 +207,26 @@ public class FileSystemSimulator implements Serializable {
         executar(tipo, () -> pai.renomearFilho(antigo, novoNome), caminho, novoNome);
     }
 
-    /** Fluxo do journaling: registrar -> executar -> confirmar (se houver Journal plugado). */
+    /**
+     * Fluxo do journaling (write-ahead logging):
+     * registrar (BEGIN no disco) -> executar em memória -> confirmar (COMMIT no disco).
+     * Se a execução lançar erro, a entrada é marcada como ABORT. Sem Journal plugado
+     * (ex.: durante o replay da recuperação), a operação apenas executa.
+     */
     private void executar(String tipo, Runnable acao, String... parametros) {
-        long id = -1;
-        if (journal != null) id = journal.registrar(tipo, parametros);
-        acao.run();
-        if (journal != null) journal.confirmar(id);
+        if (journal == null) {
+            acao.run();
+            return;
+        }
+        long id = journal.registrar(tipo, parametros);
+        try {
+            acao.run();
+        } catch (RuntimeException e) {
+            journal.abortar(id);
+            throw e;
+        }
+        journal.confirmar(id);
+        ultimoIdAplicado = id;
     }
 
     private void validarNome(String nome) {

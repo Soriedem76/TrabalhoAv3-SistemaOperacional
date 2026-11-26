@@ -1,6 +1,6 @@
 package simulador;
 
-/** Teste rápido do núcleo (Pessoa A). Execute: java -cp out simulador.DemoNucleo */
+/** Teste rápido do núcleo (Pessoa A). Execute: java -cp out simulador.DemoNucleo (após compilar com javac -d out src/simulador/*.java) */
 public class DemoNucleo {
     public static void main(String[] args) {
         FileSystemSimulator fs = FileSystemSimulator.criarNovo("data/meu.fs");

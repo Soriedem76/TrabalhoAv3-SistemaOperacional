@@ -1,0 +1,18 @@
+help
+mkdir docs
+mkdir docs/trabalhos
+touch docs/notas.txt "Olá, sistema de arquivos!"
+cp docs/notas.txt docs/trabalhos
+cd docs
+cp notas.txt backup.txt
+ls
+journal
+mv backup.txt notas-bkp.txt
+mv trabalhos entregas
+tree /
+cat entregas/notas.txt
+rmdir /docs
+rm notas-bkp.txt
+ls
+journal
+exit

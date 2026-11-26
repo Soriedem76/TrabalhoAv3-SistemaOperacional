@@ -1,0 +1,13 @@
+# Classes compiladas
+out/
+*.class
+
+# Discos e journals gerados ao executar
+data/
+
+# IDEs / sistema
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
